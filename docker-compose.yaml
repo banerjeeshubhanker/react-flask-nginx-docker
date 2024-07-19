@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "admin"
+      MONGO_INITDB_ROOT_PASSWORD: "admin"
+      MONGO_INITDB_DATABASE: helloworlddb
+      MONGODB_DATA_DIR: /data/db
+    networks:
+      - app-network
+    volumes:
+      - ./backend/init_mongo.js:/docker-entrypoint-initdb.d/init_mongo.js:ro
+      - mongodbdata:/data/db
+
+  backend:
+    build: ./backend
+    container_name: backend
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://admin:admin@mongo:27017/
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+    networks:
+      - app-network
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /app/build:/usr/share/nginx/html
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+    mongodbdata:
+        driver: local
