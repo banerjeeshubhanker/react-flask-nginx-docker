@@ -1,21 +1,35 @@
 from flask import Flask, jsonify
-from flask_cors import CORS
+import pymongo
 from pymongo import MongoClient
-import os
 
 app = Flask(__name__)
-CORS(app)
 
-# Connect to MongoDB
-client = MongoClient(os.environ.get('MONGO_URI', 'mongodb://admin:admin@mongo:27017/'))
-db = client.helloworlddb
-collection = db.messages
+def get_db():
+    client = MongoClient(host='test_mongodb',
+                         port=27017, 
+                         username='root', 
+                         password='pass',
+                        authSource="admin")
+    db = client["animal_db"]
+    return db
 
-@app.route('/api/hello', methods=['GET'])
-def hello_world():
-    # message = collection.find_one({"type": "greeting"})
-    # return jsonify(message=message['text'])
-    return jsonify({"message": "Hello World"})
+@app.route('/')
+def ping_server():
+    return "Welcome to the world of animals."
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+@app.route('/animals')
+def get_stored_animals():
+    db=""
+    try:
+        db = get_db()
+        _animals = db.animal_tb.find()
+        animals = [{"id": animal["id"], "name": animal["name"], "type": animal["type"]} for animal in _animals]
+        return jsonify({"animals": animals})
+    except:
+        pass
+    finally:
+        if type(db)==MongoClient:
+            db.close()
+
+if __name__=='__main__':
+    app.run(host="0.0.0.0", port=5000)
