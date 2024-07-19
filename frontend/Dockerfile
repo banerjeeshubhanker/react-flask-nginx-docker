@@ -1,18 +1,22 @@
 # frontend/Dockerfile
-FROM node:14-alpine AS build
+FROM node:19-alpine AS build
 
 WORKDIR /app
 
-COPY . .
+COPY package*.json ./
 
 RUN npm install
 
+COPY . .
+
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:1.21.0-alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=build /app/build /usr/share/nginx/html
 
-COPY nginx.conf /etc/nginx/nginx.d
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -13,8 +13,9 @@ collection = db.messages
 
 @app.route('/api/hello', methods=['GET'])
 def hello_world():
-    message = collection.find_one({"type": "greeting"})
-    return jsonify(message=message['text'])
+    # message = collection.find_one({"type": "greeting"})
+    # return jsonify(message=message['text'])
+    return jsonify({"message": "Hello World"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
