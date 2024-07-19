@@ -17,14 +17,14 @@ def get_db():
 def ping_server():
     return "Welcome to the world of animals."
 
-@app.route('/animals')
+@app.route('/api/hello')
 def get_stored_animals():
     db=""
     try:
         db = get_db()
         _animals = db.animal_tb.find()
         animals = [{"id": animal["id"], "name": animal["name"], "type": animal["type"]} for animal in _animals]
-        return jsonify({"animals": animals})
+        return jsonify({"message": "Hello World"})
     except:
         pass
     finally:
